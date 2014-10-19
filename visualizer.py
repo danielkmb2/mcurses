@@ -111,7 +111,7 @@ def main():
             except IOError: 
                 pass
                 #print 'warning: dropped frame' # can replace with 'pass' if no message desired 
-            time.sleep(0)
+            time.sleep(0.01)
         except KeyboardInterrupt:
             stream.close()
             curses.endwin()
