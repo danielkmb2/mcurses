@@ -80,7 +80,6 @@ def main():
     pad = curses.newpad(x,y)
     x = x-1
     y = y-2
-
     bins = y/3
 
     curses.noecho()
@@ -93,6 +92,7 @@ def main():
     curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)
 
     while True:
+
         try:
             levels = analyze(data, chunk, sample_rate, bins)
 
@@ -102,7 +102,7 @@ def main():
             if max(levels)>maxx:
                 maxx=max(levels)
 
-            
+
 
             normLevels = [x*round(((q-minx) / (maxx-minx)),2)**scale for q in levels]
 
