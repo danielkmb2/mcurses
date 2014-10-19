@@ -7,8 +7,6 @@ import time
 import decimal
 import curses
 
-
-
 def analyze(data, width, sample_rate, bins):
     # Convert raw sound data to Numpy array
     fmt = "%dH"%(len(data)/2)
@@ -33,8 +31,6 @@ def analyze(data, width, sample_rate, bins):
     levels = [sum(fourier[i:(i+size/bins)]) for i in xrange(0, size, size/bins)][:bins]
     
     return levels
-
-
 
 def main():
     chunk = 1024
@@ -67,8 +63,7 @@ def main():
                     input = True, 
                     frames_per_buffer = chunk, 
                     input_device_index = device)
-
-    
+ 
     data = stream.read(chunk)
 
     minx=0
@@ -92,7 +87,6 @@ def main():
     curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)
 
     while True:
-
         try:
             levels = analyze(data, chunk, sample_rate, bins)
 
@@ -102,10 +96,9 @@ def main():
             if max(levels)>maxx:
                 maxx=max(levels)
 
-
-
             normLevels = [x*round(((q-minx) / (maxx-minx)),2)**scale for q in levels]
 
+            #plot stuff
             for l in range(0,len(normLevels)):
                 for i in range(0,x):
                     if normLevels[l]>i:
@@ -121,23 +114,17 @@ def main():
                                     pad.addstr(x-i,l*3,barch, curses.color_pair(1))
                     else:
                         pad.addstr(x-i,l*3,'  ')
-
-
-
-
             pad.refresh(0,0, 0,0, x,y)
-            #pad.clear()
 
             # get a new chunk of data
             try: 
                 data = stream.read(chunk) 
-            except IOError: 
+            except IOError: # to control dropped frames
                 pass
             time.sleep(0.01)
         except KeyboardInterrupt:
             stream.close()
             curses.endwin()
-
             exit()
 
 if __name__ == '__main__':
