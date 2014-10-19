@@ -41,7 +41,8 @@ def main():
     sample_rate= 48000
     device = 99
     bins = 50
-    scale = .9
+    scale = .6
+    barch = '##'
 
     p = pyaudio.PyAudio()
     
@@ -84,11 +85,15 @@ def main():
 
     curses.noecho()
     curses.curs_set(0)
-
+    curses.start_color()
+    curses.use_default_colors()
+    curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
+    curses.init_pair(2, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
+    curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+    curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)
 
     while True:
         try:
-            pad.clear()
             levels = analyze(data, chunk, sample_rate, bins)
 
             #normalize levels
@@ -96,25 +101,43 @@ def main():
                 minx=min(levels)
             if max(levels)>maxx:
                 maxx=max(levels)
+
+            
+
             normLevels = [x*round(((q-minx) / (maxx-minx)),2)**scale for q in levels]
-           
+
             for l in range(0,len(normLevels)):
-                for i in range(0,int(normLevels[l])):
-                    pad.addch(x-i,l*3,'_')
-                    pad.addch(x-i,l*3+1,'_')
+                for i in range(0,x):
+                    if normLevels[l]>i:
+                        if i>x/2:
+                            pad.addstr(x-i,l*3,barch, curses.color_pair(4))
+                        else:
+                            if i>x/3:
+                                pad.addstr(x-i,l*3,barch, curses.color_pair(3))
+                            else:
+                                if i>x/6:
+                                    pad.addstr(x-i,l*3,barch, curses.color_pair(2))
+                                else:
+                                    pad.addstr(x-i,l*3,barch, curses.color_pair(1))
+                    else:
+                        pad.addstr(x-i,l*3,'  ')
+
+
+
 
             pad.refresh(0,0, 0,0, x,y)
+            #pad.clear()
 
             # get a new chunk of data
             try: 
                 data = stream.read(chunk) 
             except IOError: 
                 pass
-                #print 'warning: dropped frame' # can replace with 'pass' if no message desired 
             time.sleep(0.01)
         except KeyboardInterrupt:
             stream.close()
             curses.endwin()
+
             exit()
 
 if __name__ == '__main__':
